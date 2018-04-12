@@ -113,12 +113,19 @@ public class Test {
                 this.printDepth();
                 msg.put("NoOfRecipients", Integer.toString(email
                         .getNumberOfRecipients()));
+                this.printDepth();
+                System.out.println("ClientSubmitTime: " + email
+                        .getClientSubmitTime());
                 msg.put("ClientSubmitTime", email.getClientSubmitTime()
                         .toString());
+                this.printDepth();
+                System.out.println("MessageDeliveryTime: " + email
+                        .getMessageDeliveryTime());
+
                 msg.put("MessageDeliveryTime", email.getMessageDeliveryTime()
                         .toString());
-//                msg.put("Conversation",
-//                        this.mapConversation(body).toString());
+                msg.put("Conversation",
+                        this.mapConversation(body).toString());
                 this.printDepth();
                 email = (PSTMessage) folder.getNextChild();
 
@@ -145,17 +152,35 @@ public class Test {
         this.depth--;
     }
 
+    @SuppressWarnings("unchecked")
     private HashMap mapConversation(String body) {
-        HashMap<String, String> conv =  new HashMap<>();
-        String[] allFields = body.split("\n");
+        String MESSAGE = "Message";
+        String PARTICIPANT_ENTERED = "Participant Entered";
+        String PARTICIPANT_LEFT = "Participant Left";
 
+        HashMap<String, JSONArray> conv =  new HashMap<>();
+        String[] allFields = body.split("\n");
+        JSONArray messages = new JSONArray();
+        JSONArray participantsEntered = new JSONArray();
+        JSONArray participantsLeft = new JSONArray();
         for(String item : allFields){
             item = item.trim();
+            System.out.println("printing item:" + item);
             String[] keyval = item.split(":", 2);
             if (keyval.length > 1) {
-                conv.put(keyval[0].trim().replace(" ", ""), keyval[1].trim());
+                if (keyval[0].equals(MESSAGE)) {
+                    messages.add(keyval[1]);
+                } else if (keyval[0].equals(PARTICIPANT_ENTERED)) {
+                    participantsEntered.add(keyval[1]);
+                } else if (keyval[0].equals(PARTICIPANT_LEFT)) {
+                    participantsLeft.add(keyval[1]);
+                }
             }
         }
+        conv.put(PARTICIPANT_ENTERED, participantsEntered);
+        conv.put(PARTICIPANT_LEFT, participantsLeft);
+        conv.put(MESSAGE, messages);
+
         conv.forEach((k, v) -> System.out.println(k + "=" + v));
         return conv;
     }
