@@ -14,17 +14,20 @@ public class Test {
         new Test(args[0]);
     }
 
+    private int depth = -1;
+    private String filename;
+
     public Test(final String filename) {
         try {
             final PSTFile pstFile = new PSTFile(filename);
+            this.filename = filename;
             System.out.println(pstFile.getMessageStore().getDisplayName());
+
             this.processFolder(pstFile.getRootFolder());
         } catch (final Exception err) {
             err.printStackTrace();
         }
     }
-
-    private int depth = -1;
 
     @SuppressWarnings("unchecked")
     private void processFolder(final PSTFolder folder) throws PSTException,
@@ -58,10 +61,10 @@ public class Test {
 
 
             while (email != null) {
+                System.out.println("===================================");
                 HashMap<String, String> msg =  new HashMap<>();
                 this.printDepth();
-                System.out.println("Subject: " + email.getDescriptorNodeId()
-                        + " - " + email.getSubject());
+                System.out.println("Subject: " + email.getSubject());
                 msg.put("Subject", email.getSubject());
                 this.printDepth();
                 if (email.hasAttachments()) {
@@ -85,22 +88,37 @@ public class Test {
                 System.out.println("Author Email: "
                         + " - " + email.getSentRepresentingEmailAddress());
 
-                msg.put("AuthorEmail", email.getSentRepresentingEmailAddress
+                msg.put("Sender", email.getSentRepresentingEmailAddress
                         ());
                 this.printDepth();
                 System.out.println("Author: " + email.getSentRepresentingName()
                         + ", Recipient: " + email.getDisplayTo());
                 msg.put("From", email.getSentRepresentingName());
+                msg.put("RcvdRepresentingEmailAddress",
+                        email.getRcvdRepresentingEmailAddress());
+                this.printDepth();
                 msg.put("To", email.getDisplayTo());
+                System.out.println("To: " + email.getDisplayTo());
+
+                this.printDepth();
                 msg.put("CC", email.getDisplayCC());
+                System.out.println("CC: " + email.getDisplayCC());
+
+
                 msg.put("BCC", email.getDisplayBCC());
                 String body = email.getBody();
                 msg.put("Contents", body);
-
-                msg.put("Conversation",
-                        this.mapConversation(body).toString());
-
-
+                this.printDepth();
+                System.out.println("Contents: " + body);
+                this.printDepth();
+                msg.put("NoOfRecipients", Integer.toString(email
+                        .getNumberOfRecipients()));
+                msg.put("ClientSubmitTime", email.getClientSubmitTime()
+                        .toString());
+                msg.put("MessageDeliveryTime", email.getMessageDeliveryTime()
+                        .toString());
+//                msg.put("Conversation",
+//                        this.mapConversation(body).toString());
                 this.printDepth();
                 email = (PSTMessage) folder.getNextChild();
 
@@ -108,8 +126,8 @@ public class Test {
             }
             this.depth--;
 
-            try (FileWriter file = new FileWriter(folder.getDisplayName() +
-                ".txt")) {
+            try (FileWriter file = new FileWriter(this.filename + folder
+                    .getDisplayName() + ".json")) {
 //                Check
 //                for (int e = 0; e < emails.size(); e ++ ){
 //                    System.out.println("msg: " + emails.get(e));
@@ -118,14 +136,14 @@ public class Test {
                 obj.put("messages", emails);
                 file.write(obj.toJSONString());
                 System.out.println("Successfully Copied JSON " +
-                        "Object to File...");
+                        "Object to File: " + this.filename + "_" +
+                        folder.getDisplayName() + ".json");
             }
 
         }
 
         this.depth--;
     }
-
 
     private HashMap mapConversation(String body) {
         HashMap<String, String> conv =  new HashMap<>();
