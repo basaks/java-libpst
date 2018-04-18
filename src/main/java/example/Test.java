@@ -11,36 +11,45 @@ import com.pff.*;
 
 public class Test {
     public static void main(final String[] args) {
-        new Test(args[0]);
+        new Test(args[0], args[1]);
     }
 
     private int depth = -1;
-    private String filename;
+    private JSONObject pst = new JSONObject();
 
-    public Test(final String filename) {
+    @SuppressWarnings("unchecked")
+    public Test(final String filename, final String outputFileName) {
         try {
+            System.out.println(filename + outputFileName);
             final PSTFile pstFile = new PSTFile(filename);
-            this.filename = filename;
-            System.out.println(pstFile.getMessageStore().getDisplayName());
 
+
+            System.out.println(pstFile.getMessageStore().getDisplayName());
             this.processFolder(pstFile.getRootFolder());
+
+            try (FileWriter file = new FileWriter(outputFileName)) {
+
+                file.write(pst.toJSONString());
+                System.out.println("Successfully Converted pst to JSON " +
+                        "Object to File: " + outputFileName);
+            }
+
         } catch (final Exception err) {
             err.printStackTrace();
         }
+
+
     }
 
     @SuppressWarnings("unchecked")
-    private void processFolder(final PSTFolder folder) throws PSTException,
-            java.io.IOException {
+    private void processFolder(final PSTFolder folder)
+            throws PSTException, java.io.IOException {
         this.depth++;
         // the root folder doesn't have a display name
         if (this.depth > 0) {
             this.printDepth();
             System.out.println(folder.getDisplayName());
         }
-
-        JSONObject obj = new JSONObject();
-        obj.put("name", folder.getDisplayName());
 
         // go through the folders...
         if (folder.hasSubfolders()) {
@@ -49,12 +58,13 @@ public class Test {
                 this.processFolder(childFolder);
             }
         }
+        System.out.println(folder.getDisplayName());
+//        JSONObject obj = new JSONObject();
+//        obj.put("name", folder.getDisplayName());
 
-
+        JSONArray emails =  new JSONArray();
         // and now the emails for this folder
         if (folder.getContentCount() > 0) {
-
-            JSONArray emails =  new JSONArray();
 
             this.depth++;
             PSTMessage email = (PSTMessage) folder.getNextChild();
@@ -133,23 +143,24 @@ public class Test {
             }
             this.depth--;
 
-            try (FileWriter file = new FileWriter(this.filename + folder
-                    .getDisplayName() + ".json")) {
+//            try (FileWriter file = new FileWriter(this.outputFolder
+//                    + this.filename + folder.getDisplayName() + ".json")) {
 //                Check
 //                for (int e = 0; e < emails.size(); e ++ ){
 //                    System.out.println("msg: " + emails.get(e));
 //                }
 
-                obj.put("messages", emails);
-                file.write(obj.toJSONString());
-                System.out.println("Successfully Copied JSON " +
-                        "Object to File: " + this.filename + "_" +
-                        folder.getDisplayName() + ".json");
-            }
+//                obj.put("messages", emails);
+//                file.write(obj.toJSONString());
+//                System.out.println("Successfully Copied JSON " +
+//                        "Object to File: " + this.filename + "_" +
+//                        folder.getDisplayName() + ".json");
+//            }
 
         }
 
         this.depth--;
+        pst.put(folder.getDisplayName(), emails);
     }
 
     @SuppressWarnings("unchecked")
@@ -184,7 +195,7 @@ public class Test {
         conv.forEach((k, v) -> System.out.println(k + "=" + v));
         return conv;
     }
-
+// something about DescriptorIndexNode
     private void printDepth() {
         for (int x = 0; x < this.depth - 1; x++) {
             System.out.print(" | ");

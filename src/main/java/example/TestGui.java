@@ -64,7 +64,7 @@ public class TestGui implements ActionListener {
     private PSTMessage selectedMessage;
     private JFrame f;
 
-    public TestGui() throws PSTException, IOException {
+    public TestGui(final String filename) throws PSTException, IOException {
 
         // setup the basic window
         this.f = new JFrame("PST Browser");
@@ -80,8 +80,10 @@ public class TestGui implements ActionListener {
              * 
              * String filename = chooser.getSelectedFile().getCanonicalPath();
              */
-            String filename = "Outlook-new.pst";
-            filename = "G:\\From old Tower\\pff\\java\\Old Email.pst";
+
+//            String filename = "/home/sudipta/repos/BloombergSampleData/BloombergSampleData.pst";
+
+
             // filename = "RichardJohnson@sumac.uk.com - exchange.ost";
             // String filename = "Outlook 32bit.pst";
             // String russian = "Узеи́р Абду́л-Гусе́йн оглы́ Гаджибе́ков (азерб.
@@ -466,8 +468,11 @@ public class TestGui implements ActionListener {
      * @throws IOException
      * @throws PSTException
      */
+//    public class Test {
+//        public static void main(final String[] args) {
+//            new Test(args[0], args[1]);
     public static void main(final String[] args) throws PSTException, IOException {
-        new TestGui();
+        new TestGui(args[0]);
     }
 
 }
