@@ -5,3 +5,4 @@ java-libpst.iml
 out/
 src/main/main.iml
 src/test/test.iml
+MANIFEST*
