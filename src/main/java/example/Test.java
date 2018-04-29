@@ -38,7 +38,6 @@ public class Test {
             err.printStackTrace();
         }
 
-
     }
 
     @SuppressWarnings("unchecked")
@@ -47,7 +46,7 @@ public class Test {
         this.depth++;
         // the root folder doesn't have a display name
         if (this.depth > 0) {
-            this.printDepth();
+//            this.printDepth();
             System.out.println(folder.getDisplayName());
         }
 
@@ -62,7 +61,7 @@ public class Test {
 //        JSONObject obj = new JSONObject();
 //        obj.put("name", folder.getDisplayName());
 
-        JSONArray emails =  new JSONArray();
+        JSONArray emails = new JSONArray();
         // and now the emails for this folder
         if (folder.getContentCount() > 0) {
 
@@ -72,71 +71,64 @@ public class Test {
 
             while (email != null) {
                 System.out.println("===================================");
-                HashMap<String, String> msg =  new HashMap<>();
-                this.printDepth();
+                HashMap<String, String> msg = new HashMap<>();
+//                this.printDepth();
                 System.out.println("Subject: " + email.getSubject());
+                System.out.println("Sender Email: " + email
+                        .getSentRepresentingEmailAddress());
                 msg.put("Subject", email.getSubject());
-                this.printDepth();
+//                this.printDepth();
                 if (email.hasAttachments()) {
-                    for (int att = 0; att < email.getNumberOfAttachments();
-                         att++) {
-                        System.out.println("Attachment number: " + att + 1);
-                        PSTAttachment attachment = email.getAttachment(att);
-                        this.printDepth();
-                        System.out.println(
-                                attachment.getLongFilename() + '-' +
-                                attachment.getSize() + '-' + attachment
-                                .getFilesize() + '-' +
-                        attachment.getAttachmentContentDisposition());
-                    }
-                    msg.put("Attachments",  Integer.toString(email
+//                    for (int att = 0; att < email.getNumberOfAttachments();
+//                    att++){
+//                        System.out.println("Attachment number: " + att + 1);
+//                        PSTAttachment attachment = email.getAttachment(att);
+//                        this.printDepth();
+//                        System.out.println(
+//                                attachment.getLongFilename() + '-' +
+//                                attachment.getSize() + '-' + attachment
+//                                .getFilesize() + '-' +
+//                        attachment.getAttachmentContentDisposition());
+//                    }
+                    msg.put("Attachments", Integer.toString(email
                             .getNumberOfAttachments()));
+                } else {
+                    msg.put("Attachments", "0");
                 }
-                else {
-                    msg.put("Attachment", "0");
-                }
-                System.out.println("Author Email: "
-                        + " - " + email.getSentRepresentingEmailAddress());
 
                 msg.put("Sender", email.getSentRepresentingEmailAddress
                         ());
-                this.printDepth();
-                System.out.println("Author: " + email.getSentRepresentingName()
-                        + ", Recipient: " + email.getDisplayTo());
+//                this.printDepth();
                 msg.put("From", email.getSentRepresentingName());
                 msg.put("RcvdRepresentingEmailAddress",
                         email.getRcvdRepresentingEmailAddress());
-                this.printDepth();
+//                this.printDepth();
                 msg.put("To", email.getDisplayTo());
-                System.out.println("To: " + email.getDisplayTo());
+//                System.out.println("To: " + email.getDisplayTo());
 
-                this.printDepth();
+//                this.printDepth();
                 msg.put("CC", email.getDisplayCC());
-                System.out.println("CC: " + email.getDisplayCC());
+//                System.out.println("CC: " + email.getDisplayCC());
 
 
                 msg.put("BCC", email.getDisplayBCC());
                 String body = email.getBody();
                 msg.put("Contents", body);
-                this.printDepth();
-                System.out.println("Contents: " + body);
-                this.printDepth();
+//                this.printDepth();
+//                System.out.println("Contents: " + body);
+//                this.printDepth();
                 msg.put("NoOfRecipients", Integer.toString(email
                         .getNumberOfRecipients()));
-                this.printDepth();
-                System.out.println("ClientSubmitTime: " + email
-                        .getClientSubmitTime());
+//                this.printDepth();
                 msg.put("ClientSubmitTime", email.getClientSubmitTime()
                         .toString());
-                this.printDepth();
-                System.out.println("MessageDeliveryTime: " + email
-                        .getMessageDeliveryTime());
+//                this.printDepth();
 
                 msg.put("MessageDeliveryTime", email.getMessageDeliveryTime()
                         .toString());
-                msg.put("Conversation",
-                        this.mapConversation(body).toString());
-                this.printDepth();
+//                msg.put("Conversation",
+//                        this.mapConversation(body).toString());
+//                this.printDepth();
                 email = (PSTMessage) folder.getNextChild();
 
                 emails.add(msg);
@@ -176,7 +168,6 @@ public class Test {
         JSONArray participantsLeft = new JSONArray();
         for(String item : allFields){
             item = item.trim();
-            System.out.println("printing item:" + item);
             String[] keyval = item.split(":", 2);
             if (keyval.length > 1) {
                 if (keyval[0].equals(MESSAGE)) {
@@ -192,14 +183,14 @@ public class Test {
         conv.put(PARTICIPANT_LEFT, participantsLeft);
         conv.put(MESSAGE, messages);
 
-        conv.forEach((k, v) -> System.out.println(k + "=" + v));
+//        conv.forEach((k, v) -> System.out.println(k + "=" + v));
         return conv;
     }
 // something about DescriptorIndexNode
-    private void printDepth() {
-        for (int x = 0; x < this.depth - 1; x++) {
-            System.out.print(" | ");
-        }
-        System.out.print(" |- ");
-    }
+//    private void printDepth() {
+//        for (int x = 0; x < this.depth - 1; x++) {
+//            System.out.print(" | ");
+//        }
+//        System.out.print(" |- ");
+//    }
 }
