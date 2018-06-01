@@ -1,9 +1,10 @@
 package example;
 
+import java.io.FileOutputStream;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Vector;
-import java.io.FileWriter;
-
+import java.io.OutputStreamWriter;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import com.pff.*;
@@ -23,11 +24,12 @@ public class Test {
             System.out.println(filename + outputFileName);
             final PSTFile pstFile = new PSTFile(filename);
 
-
             System.out.println(pstFile.getMessageStore().getDisplayName());
             this.processFolder(pstFile.getRootFolder());
 
-            try (FileWriter file = new FileWriter(outputFileName)) {
+            try (OutputStreamWriter file = new OutputStreamWriter(
+                        new FileOutputStream(outputFileName),
+                        Charset.forName("UTF-8").newEncoder())) {
 
                 file.write(pst.toJSONString());
                 System.out.println("Successfully Converted pst to JSON " +
