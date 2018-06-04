@@ -4,6 +4,8 @@ import java.io.FileOutputStream;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Vector;
+import java.util.Date;
+import java.time.Instant;
 import java.io.OutputStreamWriter;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -40,6 +42,10 @@ public class Test {
             err.printStackTrace();
         }
 
+    }
+
+    private Instant dateToUTC(Date date){
+        return new Date(date.getTime()).toInstant();
     }
 
     @SuppressWarnings("unchecked")
@@ -122,12 +128,17 @@ public class Test {
                 msg.put("NoOfRecipients", Integer.toString(email
                         .getNumberOfRecipients()));
 //                this.printDepth();
-                msg.put("ClientSubmitTime", email.getClientSubmitTime()
-                        .toString());
+                // getClientSubmitTime converts date to local timezone
+                // We want UTC Time
+                msg.put("ClientSubmitUTCTime", dateToUTC(email
+                        .getClientSubmitTime()).toString());
 //                this.printDepth();
 
-                msg.put("MessageDeliveryTime", email.getMessageDeliveryTime()
-                        .toString());
+                msg.put("ClientSubmitLocalTime", email
+                        .getClientSubmitTime().toString());
+
+                msg.put("MessageDeliveryTime", email
+                        .getMessageDeliveryTime().toString());
 //                msg.put("Conversation",
 //                        this.mapConversation(body).toString());
 //                this.printDepth();
