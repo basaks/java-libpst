@@ -1,6 +1,8 @@
 package example;
 
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.lang.ArrayIndexOutOfBoundsException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Vector;
@@ -50,7 +52,7 @@ public class Test {
 
     @SuppressWarnings("unchecked")
     private void processFolder(final PSTFolder folder)
-            throws PSTException, java.io.IOException {
+            throws PSTException, IOException {
         this.depth++;
         // the root folder doesn't have a display name
         if (this.depth > 0) {
@@ -65,7 +67,7 @@ public class Test {
                 this.processFolder(childFolder);
             }
         }
-        System.out.println(folder.getDisplayName());
+//        System.out.println(folder.getDisplayName());
 //        JSONObject obj = new JSONObject();
 //        obj.put("name", folder.getDisplayName());
 
@@ -79,72 +81,22 @@ public class Test {
 
             while (email != null) {
                 System.out.println("===================================");
-                HashMap<String, String> msg = new HashMap<>();
-//                this.printDepth();
                 System.out.println("Subject: " + email.getSubject());
                 System.out.println("Sender Email: " + email
                         .getSentRepresentingEmailAddress());
-                msg.put("Subject", email.getSubject());
-//                this.printDepth();
-                if (email.hasAttachments()) {
-//                    for (int att = 0; att < email.getNumberOfAttachments();
-//                    att++){
-//                        System.out.println("Attachment number: " + att + 1);
-//                        PSTAttachment attachment = email.getAttachment(att);
-//                        this.printDepth();
-//                        System.out.println(
-//                                attachment.getLongFilename() + '-' +
-//                                attachment.getSize() + '-' + attachment
-//                                .getFilesize() + '-' +
-//                        attachment.getAttachmentContentDisposition());
-//                    }
-                    msg.put("Attachments", Integer.toString(email
-                            .getNumberOfAttachments()));
-                } else {
-                    msg.put("Attachments", "0");
+
+                try {
+                    HashMap<String, String> msg = readAMsg(email);
+                    email = (PSTMessage) folder.getNextChild();
+
+                    emails.add(msg);
+                }
+                catch(ArrayIndexOutOfBoundsException e){
+                    System.out.println("Warning: ArrayIndexOutOfBoundsException");
+                    System.out.println("Warning: This message will not be reconciled. \n" +
+                            "Check PST extraction process or Archiving process are correct");
                 }
 
-                msg.put("Sender", email.getSentRepresentingEmailAddress
-                        ());
-//                this.printDepth();
-                msg.put("From", email.getSentRepresentingName());
-                msg.put("RcvdRepresentingEmailAddress",
-                        email.getRcvdRepresentingEmailAddress());
-//                this.printDepth();
-                msg.put("To", email.getDisplayTo());
-//                System.out.println("To: " + email.getDisplayTo());
-
-//                this.printDepth();
-                msg.put("CC", email.getDisplayCC());
-//                System.out.println("CC: " + email.getDisplayCC());
-
-
-                msg.put("BCC", email.getDisplayBCC());
-                String body = email.getBody();
-                msg.put("Contents", body);
-//                this.printDepth();
-//                System.out.println("Contents: " + body);
-//                this.printDepth();
-                msg.put("NoOfRecipients", Integer.toString(email
-                        .getNumberOfRecipients()));
-//                this.printDepth();
-                // getClientSubmitTime converts date to local timezone
-                // We want UTC Time
-                msg.put("ClientSubmitUTCTime", dateToUTC(email
-                        .getClientSubmitTime()).toString());
-//                this.printDepth();
-
-                msg.put("ClientSubmitLocalTime", email
-                        .getClientSubmitTime().toString());
-
-                msg.put("MessageDeliveryTime", email
-                        .getMessageDeliveryTime().toString());
-//                msg.put("Conversation",
-//                        this.mapConversation(body).toString());
-//                this.printDepth();
-                email = (PSTMessage) folder.getNextChild();
-
-                emails.add(msg);
             }
             this.depth--;
 
@@ -166,6 +118,69 @@ public class Test {
 
         this.depth--;
         pst.put(folder.getDisplayName(), emails);
+    }
+
+    private HashMap<String, String> readAMsg(PSTMessage email) throws PSTException, IOException {
+        HashMap<String, String> msg = new HashMap<>();
+        msg.put("Subject", email.getSubject());
+//                this.printDepth();
+        if (email.hasAttachments()) {
+//                    for (int att = 0; att < email.getNumberOfAttachments();
+//                    att++){
+//                        System.out.println("Attachment number: " + att + 1);
+//                        PSTAttachment attachment = email.getAttachment(att);
+//                        this.printDepth();
+//                        System.out.println(
+//                                attachment.getLongFilename() + '-' +
+//                                attachment.getSize() + '-' + attachment
+//                                .getFilesize() + '-' +
+//                        attachment.getAttachmentContentDisposition());
+//                    }
+            msg.put("Attachments", Integer.toString(email
+                    .getNumberOfAttachments()));
+        } else {
+            msg.put("Attachments", "0");
+        }
+
+        msg.put("Sender", email.getSentRepresentingEmailAddress
+                ());
+//                this.printDepth();
+        msg.put("From", email.getSentRepresentingName());
+        msg.put("RcvdRepresentingEmailAddress",
+                email.getRcvdRepresentingEmailAddress());
+//                this.printDepth();
+        msg.put("To", email.getDisplayTo());
+//                System.out.println("To: " + email.getDisplayTo());
+
+//                this.printDepth();
+        msg.put("CC", email.getDisplayCC());
+//                System.out.println("CC: " + email.getDisplayCC());
+
+
+        msg.put("BCC", email.getDisplayBCC());
+        String body = email.getBody();
+        msg.put("Contents", body);
+//                this.printDepth();
+//                System.out.println("Contents: " + body);
+//                this.printDepth();
+        msg.put("NoOfRecipients", Integer.toString(email
+                .getNumberOfRecipients()));
+//                this.printDepth();
+        // getClientSubmitTime converts date to local timezone
+        // We want UTC Time
+        msg.put("ClientSubmitUTCTime", dateToUTC(email
+                .getClientSubmitTime()).toString());
+//                this.printDepth();
+
+        msg.put("ClientSubmitLocalTime", email
+                .getClientSubmitTime().toString());
+
+        msg.put("MessageDeliveryTime", email
+                .getMessageDeliveryTime().toString());
+//                msg.put("Conversation",
+//                        this.mapConversation(body).toString());
+//                this.printDepth();
+        return msg;
     }
 
     @SuppressWarnings("unchecked")
