@@ -87,8 +87,6 @@ public class Test {
 
                 try {
                     HashMap<String, String> msg = readAMsg(email);
-                    email = (PSTMessage) folder.getNextChild();
-
                     emails.add(msg);
                 }
                 catch(ArrayIndexOutOfBoundsException e){
@@ -96,6 +94,7 @@ public class Test {
                     System.out.println("Warning: This message will not be reconciled. \n" +
                             "Check PST extraction process or Archiving process are correct");
                 }
+                email = (PSTMessage) folder.getNextChild();
 
             }
             this.depth--;
